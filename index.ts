@@ -31,6 +31,17 @@ const makeRequest = async (): Promise<Product[]> => {
   return (await response.json()) as Product[];
 };
 
+// Search products by name
+const searchProducts = async (
+  keyword: string
+): Promise<Product[]> => {
+  const products = await makeRequest();
+
+  return products.filter((product) =>
+    product.name.toLowerCase().includes(keyword.toLowerCase())
+  );
+};
+
 // Create MCP server
 const createServer = () => {
   const server = new McpServer({
@@ -76,6 +87,51 @@ const createServer = () => {
     }
   );
 
+  // Tool: Search products
+  server.registerTool(
+    "search_products",
+    {
+      description: "Search products by name keyword",
+      inputSchema: z.object({
+        keyword: z.string().min(1).describe("Product name to search"),
+      }),
+    },
+    async ({ keyword }) => {
+      try {
+        const products = await searchProducts(keyword);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                {
+                  keyword,
+                  count: products.length,
+                  products,
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      } catch (error: unknown) {
+        return {
+          content: [
+            {
+              type: "text",
+              text:
+                error instanceof Error
+                  ? error.message
+                  : "Failed to search products",
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
   return server;
 };
 
