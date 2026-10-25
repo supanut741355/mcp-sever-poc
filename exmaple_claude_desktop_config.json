@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "yoApp": {
+      "command": "node",
+      "args": [
+        "/Users/nutx/Desktop/Workspaces/mcp/poc-own-mcp-server/index.ts"
+      ]
+    }
+  }
+}
